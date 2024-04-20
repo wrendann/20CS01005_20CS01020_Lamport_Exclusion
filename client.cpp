@@ -106,9 +106,12 @@ void readThread(int readsockfd, int s_no)
 			write(readsockfd, replyMsg.c_str(), MAX_MESSAGE_LENGTH);
 		}
 		else if(startsWith(str, "release critical section")){
-			std::cout << "Critical section access release from system no. " << s_no << std::endl;
+			std::string strReply = "Critical section access release from system no. " + std::to_string(s_no) + "\n";
+			std::cout << strReply;
 			requests.erase({requestLookup[s_no], s_no});
 			requestLookup.erase(s_no);
+			if(this_system_no == 1 && critical_section_held_by == s_no)
+				critical_section_held_by = 0;
 			checkToEnterCriticalSection();
 		}
 		else if(startsWith(str, "reply to request")){
@@ -229,7 +232,7 @@ int connectToIPAddress()
 
     sockaddr_in addr{};
     addr.sin_family = AF_INET;
-	addr.sin_addr.s_addr=inet_addr(ip.c_str());
+		addr.sin_addr.s_addr=inet_addr(ip.c_str());
     addr.sin_port = htons(port_number);
     if (inet_pton(AF_INET, ip.c_str(), &addr.sin_addr) <= 0) {
         std::cerr << "Invalid address: Address not supported" << std::endl;
@@ -328,10 +331,6 @@ int main() {
     }
 
 	std::cout << "All systems connected to each other." << std::endl;
-
-	std::cout << "sockfd1: " << sockfd1 << std::endl;
-	std::cout << "sockfd2: " << sockfd2 << std::endl;
-	std::cout << "sockfd3: " << sockfd3 << std::endl;
 
 	std::thread t, t1, t2, t3;
     t = std::thread(writeThread);
