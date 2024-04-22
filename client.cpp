@@ -172,15 +172,15 @@ void readThread(int readsockfd, int s_no)
 
 void writeThread()
 {
-	std::cout << RED;
+	std::cout << YELLOW;
 	std::cout << ("Commands:\n");
-	std::cout << ("local event              ") << RESET << ("---- performs a local event\n") << RED;
-	std::cout << ("request critical section ---- ") << RESET << ("requests access to the critical section\n") << RED;
-	std::cout << ("release critical section ---- ") << RESET << ("releases access from the critical section if you have access, else removes request\n") << RED;
-	std::cout << ("check critical section   ---- ") << RESET << ("returns the system which currently has access to the critical section\n") << RED;
-	std::cout << ("view requests            ---- ") << RESET << ("view request queue of this client along with timestamps\n") << RED;
-	std::cout << ("view replies             ---- ") << RESET << ("view reply queue of this client along with timestamps\n") << RED;
-	std::cout << ("close                    ---- ") << RESET << ("closes the connection\n") << RED;
+	std::cout << ("local event              ---- ") << RESET << ("performs a local event\n") << YELLOW;
+	std::cout << ("request critical section ---- ") << RESET << ("requests access to the critical section\n") << YELLOW;
+	std::cout << ("release critical section ---- ") << RESET << ("releases access from the critical section if you have access, else removes request\n") << YELLOW;
+	std::cout << ("check critical section   ---- ") << RESET << ("returns the system which currently has access to the critical section\n") << YELLOW;
+	std::cout << ("view requests            ---- ") << RESET << ("view request queue of this client along with timestamps\n") << YELLOW;
+	std::cout << ("view replies             ---- ") << RESET << ("view reply queue of this client along with timestamps\n") << YELLOW;
+	std::cout << ("close                    ---- ") << RESET << ("closes the connection\n") << YELLOW;
 	std::cout << RESET;
 	while (true)
 	{
