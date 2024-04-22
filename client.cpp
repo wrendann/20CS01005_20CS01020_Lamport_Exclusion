@@ -118,7 +118,7 @@ void readThread(int readsockfd, int s_no)
 		}
 		else if (startsWith(str, "critical section is "))
 		{
-			std::cout << str << std::endl;
+			std::cout << MAGENTA << str << RESET << std::endl;
 			continue;
 		}
 		else if (startsWith(str, "enter critical section"))
@@ -143,7 +143,11 @@ void readThread(int readsockfd, int s_no)
 		}
 		else if (startsWith(str, "release critical section"))
 		{
-			std::string strReply = "Critical section access release from system no. " + std::to_string(s_no) + "\n";
+			std::string strReply;
+			if ((*(requests.begin())).second == s_no)
+				strReply = "Critical section access release from system no. " + std::to_string(s_no) + "\n";
+			else
+				strReply = "Critical section request withdrawn from system no. " + std::to_string(s_no) + "\n";
 			std::cout << GREEN << strReply << RESET;
 			requests.erase({requestLookup[s_no], s_no});
 			requestLookup.erase(s_no);
@@ -186,16 +190,27 @@ void writeThread()
 			continue;
 		if (startsWith(str, "close"))
 		{
+			std::cout << "---------------" << std::endl;
 			pid_t pid = getpid();
 			kill(pid, SIGTERM);
 		}
 		else if (startsWith(str, "local event"))
 		{
+			std::cout << "---------------" << std::endl;
 			localTimestamp++;
 			std::cout << YELLOW << "Your current local timestamp is " << localTimestamp << RESET << std::endl;
 		}
 		else if (startsWith(str, "request critical section"))
 		{
+			std::cout << "---------------" << std::endl;
+			if (requestLookup.find(this_system_no) != requestLookup.end())
+			{
+				if ((*(requests.begin())).second == this_system_no)
+					std::cout << RED << "You already have critical section! " << RESET << std::endl;
+				else
+					std::cout << RED << "You already have requested critical section! " << RESET << std::endl;
+				continue;
+			}
 			localTimestamp++;
 			std::cout << YELLOW << "Your current local timestamp is " << localTimestamp << RESET << std::endl;
 			std::string msg = "request critical section\n" + std::to_string(localTimestamp);
@@ -206,6 +221,13 @@ void writeThread()
 		}
 		else if (startsWith(str, "release critical section"))
 		{
+			std::cout << "---------------" << std::endl;
+			if (requestLookup.find(this_system_no) == requestLookup.end())
+			{
+				std::cout << RED << "You are not using Critical section or requested it earlier!" << RESET << std::endl;
+				replies = std::vector<IntPair>();
+				continue;
+			}
 			localTimestamp++;
 			std::cout << YELLOW << "Your current local timestamp is " << localTimestamp << RESET << std::endl;
 			std::string msg = "release critical section\n" + std::to_string(localTimestamp);
@@ -213,15 +235,19 @@ void writeThread()
 			requests.erase({requestLookup[this_system_no], this_system_no});
 			requestLookup.erase(this_system_no);
 			requestTimeStamp = INT_MAX;
+			if (this_system_no == 1 && critical_section_held_by == 1)
+				critical_section_held_by = 0;
+			replies = std::vector<IntPair>();
 		}
 		else if (startsWith(str, "check critical section"))
 		{
+			std::cout << "---------------" << std::endl;
 			if (this_system_no == 1)
 			{
 				if (critical_section_held_by == 0)
 					std::cout << GREEN << "critical section is not held by anyone" << RESET << std::endl;
 				else
-					std::cout << MAGENTA << "critical section is held by " << critical_section_held_by << RESET << std::endl;
+					std::cout << MAGENTA << "critical section is held by system" << critical_section_held_by << RESET << std::endl;
 			}
 			else
 			{
@@ -231,6 +257,7 @@ void writeThread()
 		}
 		else if (startsWith(str, "view requests"))
 		{
+			std::cout << "---------------" << std::endl;
 			for (const auto &r : requests)
 			{
 				std::cout << BLUE << "System " << r.second << ", Timestamp: " << r.first << "\n"
@@ -239,6 +266,7 @@ void writeThread()
 		}
 		else if (startsWith(str, "view replies"))
 		{
+			std::cout << "---------------" << std::endl;
 			for (const auto &r : replies)
 			{
 				std::cout << BLUE << "System " << r.second << ", Timestamp: " << r.first << "\n"
@@ -247,6 +275,7 @@ void writeThread()
 		}
 		else
 		{
+			std::cout << "---------------" << std::endl;
 			std::cout << RED << "Invalid command" << std::endl
 					  << RESET;
 		}
